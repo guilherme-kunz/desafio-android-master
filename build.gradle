@@ -29,6 +29,8 @@ buildscript {
         rxjava_version = "2.2.17"
         rxandroid_version = "2.1.1"
         core_ktx_test_version = "1.2.0"
+        activity_ktx_version = "1.5.1"
+        room_version = "2.4.3"
     }
 
     repositories {
