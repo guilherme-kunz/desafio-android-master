@@ -1,6 +1,9 @@
 package com.picpay.desafio.android
 
 import android.app.Application
+import com.picpay.desafio.android.di.repositoryModule
+import com.picpay.desafio.android.di.userDateBuilder
+import com.picpay.desafio.android.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 
@@ -9,7 +12,13 @@ class MyApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@MyApplication)
-            modules(appModule)
+            modules(
+                listOf(
+                    viewModelModule,
+                    repositoryModule,
+                    userDateBuilder
+                )
+            )
         }
     }
 }
