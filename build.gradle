@@ -26,6 +26,8 @@ buildscript {
         core_ktx_test_version = "1.2.0"
         activity_ktx_version = "1.5.1"
         room_version = "2.4.3"
+        mockk_version = "1.10.0"
+        logging_interceptor_version = "5.0.0-alpha.2"
     }
 
     repositories {

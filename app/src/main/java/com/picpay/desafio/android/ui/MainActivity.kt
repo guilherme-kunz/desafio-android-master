@@ -1,4 +1,4 @@
-package com.picpay.desafio.android
+package com.picpay.desafio.android.ui
 
 import android.os.Bundle
 import android.view.View
@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.picpay.desafio.android.R
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -19,7 +20,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.fetchUsers()
+        viewModel.getUsersFromDatabase()
         setupProgressBar()
         setupViewModelObservers()
         setupRecyclerView()
@@ -41,12 +42,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun setupViewModelObservers() {
         viewModel.users.observe(this, Observer { users ->
-            adapter.users = users
-        })
-        viewModel.errorMessage.observe(this, Observer { message ->
-            message?.let {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            if (users != null) {
+                adapter.users = users
             }
+        })
+        viewModel.error.observe(this, Observer {
+                Toast.makeText(this, "Aconteceu algum problema, tente novamente mais tarde", Toast.LENGTH_SHORT).show()
         })
     }
 }
