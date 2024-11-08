@@ -1,7 +1,5 @@
 package com.picpay.desafio.android
 
-import android.app.Application
-import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.lifecycle.LiveData
@@ -10,12 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class MainViewModel(application: Application) : ViewModel() {
-
-    private val userDao = AppDatabase.getDatabase(application).userDao()
+class MainViewModel(
+    private val connectivityManager: ConnectivityManager,
+    private val userDao: UserDao,
+    private val service: PicPayService
+) : ViewModel() {
 
     private val _users = MutableLiveData<List<User>>()
     val users: LiveData<List<User>> get() = _users
@@ -26,19 +24,11 @@ class MainViewModel(application: Application) : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
-    private val service: PicPayService by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://609a908e0f5a13001721b74e.mockapi.io/picpay/api/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(PicPayService::class.java)
-    }
-
-    fun fetchUsers(context: Context) {
+    fun fetchUsers() {
         _loading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                if (isNetworkAvailable(context)) {
+                if (isNetworkAvailable()) {
                     // Se houver conexão com a internet, tenta chamar a API
                     val response = service.getUsers().execute()
                     if (response.isSuccessful) {
@@ -67,8 +57,7 @@ class MainViewModel(application: Application) : ViewModel() {
         }
     }
 
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private fun isNetworkAvailable(): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
         return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true

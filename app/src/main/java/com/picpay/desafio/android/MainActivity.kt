@@ -6,20 +6,20 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var adapter: UserListAdapter
-    private lateinit var viewModel: MainViewModel
+    private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupViewModelFactory()
+        viewModel.fetchUsers()
         setupProgressBar()
         setupViewModelObservers()
         setupRecyclerView()
@@ -39,11 +39,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         })
     }
 
-    private fun setupViewModelFactory() {
-        val viewModelFactory = MainViewModelFactory(application)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-    }
-
     private fun setupViewModelObservers() {
         viewModel.users.observe(this, Observer { users ->
             adapter.users = users
@@ -53,10 +48,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         })
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.fetchUsers(this)
     }
 }
