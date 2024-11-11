@@ -1,5 +1,8 @@
 package com.picpay.desafio.android.ui
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,7 +12,7 @@ import com.picpay.desafio.android.repository.Repository
 import com.picpay.desafio.android.service.NetworkResponse
 import kotlinx.coroutines.launch
 
-class MainViewModel(val repository: Repository) : ViewModel() {
+class MainViewModel(private val repository: Repository) : ViewModel() {
 
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> get() = _loading
@@ -19,6 +22,16 @@ class MainViewModel(val repository: Repository) : ViewModel() {
 
     private val _error = MutableLiveData<Unit>()
     val error: LiveData<Unit> = _error
+
+     fun verifyNetwork(context: Context) {
+         _loading.value = true
+        if (isNetworkAvailable(context)) {
+            fetchUsers()
+        } else {
+            getUsersFromDatabase()
+        }
+         _loading.value = false
+    }
 
     private fun fetchUsers() {
         _loading.value = true
@@ -47,7 +60,14 @@ class MainViewModel(val repository: Repository) : ViewModel() {
             } else {
                 fetchUsers()
             }
-            _loading.value = false
         }
+        _loading.value = false
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }

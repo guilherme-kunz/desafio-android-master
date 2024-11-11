@@ -1,7 +1,12 @@
 package com.picpay.desafio.android
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
 import com.picpay.desafio.android.model.User
 import com.picpay.desafio.android.repository.Repository
 import com.picpay.desafio.android.service.NetworkResponse
@@ -19,8 +24,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
@@ -35,6 +40,12 @@ class MainViewModelTest {
     @Mock
     private lateinit var repository: Repository
 
+    @Mock
+    private lateinit var context: Context
+
+    @Mock
+    private lateinit var connectivityManager: ConnectivityManager
+
     private lateinit var mainViewModel: MainViewModel
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -43,11 +54,46 @@ class MainViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         mainViewModel = MainViewModel(repository)
+        `when`(context.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(connectivityManager)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `verifyNetwork should fetch users if network is available`() = runTest {
+        val context: Context = mock(Context::class.java)
+        val connectivityManager: ConnectivityManager = mock(ConnectivityManager::class.java)
+        val networkCapabilities: NetworkCapabilities = mock(NetworkCapabilities::class.java)
+        `when`(context.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(connectivityManager)
+        `when`(connectivityManager.activeNetwork).thenReturn(mock())
+        `when`(connectivityManager.getNetworkCapabilities(any())).thenReturn(networkCapabilities)
+        `when`(networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)).thenReturn(true)
+        val userList = listOf(User(id = 1001, img = "https://randomuser.me/api/portraits/men/9.jpg", name = "Eduardo Santos", username = "@eduardo.santos"))
+        `when`(repository.getUsers()).thenReturn(NetworkResponse.Success(userList))
+        val observer = mock(Observer::class.java) as Observer<List<User>?>
+        mainViewModel.users.observeForever(observer)
+        mainViewModel.verifyNetwork(context)
+        verify(repository, times(1)).getUsers()
+        verify(observer).onChanged(userList)
+        mainViewModel.users.removeObserver(observer)
+    }
+
+    @Test
+    fun `verifyNetwork should get users from database if network is unavailable`() = runTest {
+        `when`(connectivityManager.activeNetwork).thenReturn(mock())
+        `when`(connectivityManager.getNetworkCapabilities(any())).thenReturn(null)
+        val userList = listOf(User(id = 1001, img = "https://randomuser.me/api/portraits/men/9.jpg", name = "Eduardo Santos", username = "@eduardo.santos"))
+        `when`(repository.getUsersFromDatabase()).thenReturn(userList)
+        val observer = mock(Observer::class.java) as Observer<List<User>?>
+        mainViewModel.users.observeForever(observer)
+        mainViewModel.verifyNetwork(context)
+        verify(repository).getUsersFromDatabase()
+        verify(observer).onChanged(userList)
+        Assert.assertEquals(mainViewModel.users.value, userList)
+        mainViewModel.users.removeObserver(observer)
     }
 
     @Test
@@ -57,7 +103,7 @@ class MainViewModelTest {
         val observer = mock(Observer::class.java) as Observer<List<User>?>
         mainViewModel.users.observeForever(observer)
         mainViewModel.getUsersFromDatabase()
-        verify(repository, times(1)).getUsersFromDatabase()
+        verify(repository).getUsersFromDatabase()
         verify(observer).onChanged(userList)
         Assert.assertEquals(mainViewModel.users.value, userList)
         mainViewModel.users.removeObserver(observer)
@@ -70,8 +116,8 @@ class MainViewModelTest {
         val observer = mock(Observer::class.java) as Observer<List<User>?>
         mainViewModel.users.observeForever(observer)
         mainViewModel.getUsersFromDatabase()
-        verify(repository, times(1)).getUsersFromDatabase()
-        verify(repository, times(1)).getUsers()
+        verify(repository).getUsersFromDatabase()
+        verify(repository).getUsers()
         mainViewModel.users.removeObserver(observer)
     }
 
@@ -81,10 +127,9 @@ class MainViewModelTest {
         val errorObserver = mock(Observer::class.java) as Observer<Unit>
         mainViewModel.error.observeForever(errorObserver)
         mainViewModel.getUsersFromDatabase()
-        verify(repository, times(1)).getUsers()
+        verify(repository).getUsers()
         verify(errorObserver).onChanged(Unit)
         Assert.assertNotNull(mainViewModel.error.value)
-
         mainViewModel.error.removeObserver(errorObserver)
     }
 
@@ -93,6 +138,6 @@ class MainViewModelTest {
         val userList = listOf(User(id = 1001, img = "https://randomuser.me/api/portraits/men/9.jpg", name = "Eduardo Santos", username = "@eduardo.santos"))
         `when`(repository.getUsers()).thenReturn(NetworkResponse.Success(userList))
         mainViewModel.getUsersFromDatabase()
-        verify(repository, times(1)).insertUsersFromDatabase(userList)
+        verify(repository).insertUsersFromDatabase(userList)
     }
 }
