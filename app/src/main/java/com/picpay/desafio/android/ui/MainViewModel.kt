@@ -24,16 +24,14 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     val error: LiveData<Unit> = _error
 
      fun verifyNetwork(context: Context) {
-         _loading.value = true
         if (isNetworkAvailable(context)) {
             fetchUsers()
         } else {
             getUsersFromDatabase()
         }
-         _loading.value = false
     }
 
-    private fun fetchUsers() {
+    fun fetchUsers() {
         _loading.value = true
         viewModelScope.launch {
             when (val response = repository.getUsers()) {
@@ -58,7 +56,7 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
             if (!listOfUsers.isNullOrEmpty()) {
                 _users.value = listOfUsers
             } else {
-                fetchUsers()
+                _error.value = Unit
             }
         }
         _loading.value = false
