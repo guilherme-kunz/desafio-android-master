@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // Kotlin
     implementation "androidx.core:core-ktx:$core_ktx_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
@@ -52,7 +52,6 @@ dependencies {
     implementation "io.insert-koin:koin-core:$koin_version"
     implementation "io.insert-koin:koin-android:$koin_version"
     implementation "com.google.dagger:dagger:$dagger_version"
-    implementation 'androidx.test.ext:junit-ktx:1.2.1'
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
     // Lifecycle and ViewModel
@@ -66,15 +65,15 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 
     // RxJava
-    implementation "io.reactivex.rxjava2:rxjava:$rxjava_version"
-    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+    implementation "io.reactivex.rxjava3:rxjava:$rxjava_version"
+    implementation "io.reactivex.rxjava3:rxandroid:$rxandroid_version"
 
     // Gson
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "com.google.code.gson:gson:$gson_version"
 
     // Retrofit and OkHttp
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
@@ -83,6 +82,7 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$picasso_version"
     implementation "de.hdodenhof:circleimageview:$circleimageview_version"
 
+    // Logging Interceptor
     implementation "com.squareup.okhttp3:logging-interceptor:$logging_interceptor_version"
 
     // Room Database
@@ -94,15 +94,17 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
     testImplementation "io.insert-koin:koin-test:$koin_version"
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.arch.core:core-testing:$core_testing_version"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
 
     //Mockk
     testImplementation "io.mockk:mockk:$mockk_version"
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test:core:1.5.0'
-    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+    // Android Testing
+    androidTestImplementation "androidx.test.ext:junit:$androidx_junit_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    androidTestImplementation "androidx.test:core:$androidx_test_core_version"
+    androidTestImplementation "androidx.test:core-ktx:$androidx_test_core_version"
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.5'
 }
