@@ -8,12 +8,23 @@ import com.picpay.desafio.android.repository.Repository
 import com.picpay.desafio.android.repository.RepositoryImpl
 import com.picpay.desafio.android.service.RetrofitBuilder
 import com.picpay.desafio.android.ui.MainViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
+val dispatchersModule = module {
+    single<CoroutineDispatcher>(named("io")) { Dispatchers.IO }
+}
 val viewModelModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModel {
+        MainViewModel(
+            repository = get(),
+            ioDispatcher = get(named("io"))
+        )
+    }
 }
 
 val repositoryModule = module {
