@@ -6,8 +6,8 @@ import android.net.NetworkCapabilities
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.picpay.desafio.android.model.User
+import com.picpay.desafio.android.model.UserDataSource
 import com.picpay.desafio.android.repository.Repository
-import com.picpay.desafio.android.service.NetworkResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: Repository,
+                    private val userDataSource: UserDataSource,
                     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO) : ViewModel() {
 
     private val _loading = MutableStateFlow<Boolean>(true)
@@ -36,23 +37,19 @@ class MainViewModel(private val repository: Repository,
     }
 
     fun fetchUsers() {
-        _loading.value = true
         viewModelScope.launch(ioDispatcher) {
-            when (val response = repository.getUsers()) {
-                is NetworkResponse.Error -> {
-                    _error.value = Unit
-                }
-                is NetworkResponse.Success -> {
-                    response.data.let {
-                        _users.value = it
-                        repository.insertUsersFromDatabase(it)
-                    }
-                }
+            _loading.value = true
+            try {
+                val userList = userDataSource.getUsers()
+                _users.value = userList
+                repository.insertUsersFromDatabase(userList)
+            } catch (e: Exception) {
+                _error.value = Unit
+            } finally {
+                _loading.value = false
             }
         }
-        _loading.value = false
     }
-
     fun getUsersFromDatabase() {
         _loading.value = true
         viewModelScope.launch(ioDispatcher) {

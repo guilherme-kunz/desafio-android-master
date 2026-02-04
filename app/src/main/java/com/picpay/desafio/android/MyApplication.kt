@@ -2,6 +2,7 @@ package com.picpay.desafio.android
 
 import android.app.Application
 import com.picpay.desafio.android.di.dispatchersModule
+import com.picpay.desafio.android.di.networkModule
 import com.picpay.desafio.android.di.repositoryModule
 import com.picpay.desafio.android.di.userDateBuilder
 import com.picpay.desafio.android.di.viewModelModule
@@ -15,6 +16,7 @@ class MyApplication : Application() {
             androidContext(this@MyApplication)
             modules(
                 listOf(
+                    networkModule,
                     dispatchersModule,
                     viewModelModule,
                     repositoryModule,
